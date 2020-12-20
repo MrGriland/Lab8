@@ -16,6 +16,13 @@ namespace Lab8
         void Add(T value);
         void Display();
     }
+    public interface IMain1<T> where T : struct
+
+    {
+        void Remove();
+        void Add(T value);
+        void Display();
+    }
     class Program
     {
         static void Main(string[] args)
@@ -85,6 +92,10 @@ namespace Lab8
             {
                 Console.WriteLine(sr.ReadToEnd());
             }
+
+            List1<float> f10 = new List1<float>(new float[6] { 1.55f, 5.22f, 3.344f, 54.1f, 4.88f, 43.72f });
+            f10.Display();
+
         }
     }
     public class List<T> : IMain<T>
@@ -275,4 +286,189 @@ namespace Lab8
             : base(message)
         { }
     }
+
+    public class List1<T> : IMain1<T> where T: struct
+    {
+        public void Remove()
+        {
+            T[] result = new T[plenty.Length - 1];
+            for (int i = 0; i < plenty.Length - 1; i++)
+                result[i] = plenty[i];
+            this.plenty = result;
+        }
+        public void Add(T value)
+        {
+            T[] result = new T[plenty.Length + 1];
+            result[result.Length - 1] = value;
+            for (int i = plenty.Length - 1; i >= 0; i--)
+            {
+                result[i] = plenty[i];
+            }
+            this.plenty = result;
+            if (plenty.Length > 10) throw new ListException("Вы не можете добавить новые элементы если длина текущего списка превышает или равна 10-ти элементам!");
+        }
+        public void Display()
+        {
+            if (plenty.Length == 0)
+            {
+                Console.WriteLine($"Список пуст!");
+                return;
+            }
+
+            string result = "(";
+            for (int i = 0; i < plenty.Length; i++)
+            {
+                if (i == plenty.Length - 1) result += $"{plenty[i]}";
+                else result += $"{plenty[i]}, ";
+
+            }
+            result += ")";
+            Console.WriteLine($"Список: {result}");
+        }
+
+        public string dis()
+        {
+            if (plenty.Length == 0)
+            {
+                Console.WriteLine($"Список пуст!");
+            }
+
+            string result = "(";
+            for (int i = 0; i < plenty.Length; i++)
+            {
+                if (i == plenty.Length - 1) result += $"{plenty[i]}";
+                else result += $"{plenty[i]}, ";
+
+            }
+            result += ")";
+            return result;
+        }
+
+        public T[] plenty;
+
+        public List1(T[] values)
+        {
+            plenty = values;
+        }
+        public static List1<T> operator +(List1<T> set, T value)
+        {
+            int l = set.plenty.Length;
+            Array.Resize(ref set.plenty, ++l);
+            set.plenty[--l] = value;
+            return set;
+        }
+        public static List1<T> operator +(List1<T> s1, List1<T> s2)
+        {
+            T[] z = new T[s1.plenty.Length + s2.plenty.Length];
+            s1.plenty.CopyTo(z, 0);
+            s2.plenty.CopyTo(z, s1.plenty.Length);
+            return new List1<T>(z);
+        }
+        public static List1<T> operator *(List1<T> s1, List1<T> s2)
+        {
+            int len = 0, ind = 0;
+            foreach (T w1 in s1.plenty)
+            {
+                foreach (T w2 in s2.plenty)
+                {
+                    if (w1.Equals(w2))
+                    {
+                        len++;
+                    }
+                }
+            }
+            T[] z = new T[len];
+            foreach (T w1 in s1.plenty)
+            {
+                foreach (T w2 in s2.plenty)
+                {
+                    if (w1.Equals(w2))
+                    {
+                        z[ind] = w1;
+                        ind++;
+                    }
+                }
+            }
+            return new List1<T>(z);
+        }
+        public void WriteFile(string writePath, bool rw = true)
+        {
+            using (StreamWriter sw = new StreamWriter(writePath, rw, System.Text.Encoding.Default))
+            {
+                sw.WriteLine(dis());
+            }
+        }
+        public static bool operator |(List1<T> s1, List1<T> s2)
+        {
+            int buf = 0;
+            for (int i = 0; i < s1.plenty.Length; i++)
+            {
+                for (int j = 0; j < s2.plenty.Length; j++)
+                {
+                    if (s1.plenty[i].Equals(s2.plenty[j]))
+                    {
+                        buf++;
+                    }
+                }
+            }
+            if (buf == s2.plenty.Length)
+                return true;
+            else
+                return false;
+        }
+        public static int operator !(List1<T> s1)
+        {
+            return s1.plenty.Length;
+        }
+        public class Owner
+        {
+            private int id;
+            private string name;
+            private string organisation;
+
+            public Owner(int id, string name, string organisation)
+            {
+                this.id = id;
+                this.name = name;
+                this.organisation = organisation;
+            }
+
+            public int ID
+            {
+                get => id;
+            }
+
+            public string Name
+            {
+                get => name;
+            }
+            public string Organisation
+            {
+                get => organisation;
+            }
+        }
+
+        public class Date
+        {
+            private int day, month, year;
+            public int Day
+            {
+                get => day;
+            }
+            public int Month
+            {
+                get => month;
+            }
+            public int Year
+            {
+                get => year;
+            }
+            public Date(int d, int m, int y)
+            {
+                day = d; month = m; year = y;
+            }
+        }
+    }
 }
+
+//4, 5 сделать ограничение обощений
